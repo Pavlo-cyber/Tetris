@@ -1,67 +1,37 @@
 #include <iostream>
 #include<random>
-#include<vector>
 #include<time.h>
 #include<SFML/Graphics.hpp>
 #include"TetrisSpace.h"
+#include<array>
+#include "Tetramino.h"
+#include "Fild.h"
+#include "Collision_Handler.h"
+
 
 using namespace sf;
 
-class Tetramino
+
+class Random
 {
-   short _rect1;
-   short _rect2;
-   short _rect3;
-   short _rect4;
 public:
-    static const std::vector<Tetramino> tetraminos;
-
-   Tetramino(short rect1,short rect2,short rect3,short rect4):_rect1(rect1),_rect2(rect2),_rect3(rect3),_rect4(rect4)
-   {}
-    std::vector<short> Get_X() const
-   {
-       return std::vector <short> {static_cast<short>(_rect1%2),static_cast<short>(_rect2%2),static_cast<short>(_rect3%2),static_cast<short>(_rect4%2)};
-   }
-    std::vector<short> Get_Y() const
-   {
-       return std::vector <short> {static_cast<short>(_rect1/2),static_cast<short>(_rect2/2),static_cast<short>(_rect3/2),static_cast<short>(_rect4/2)};
-   }
-
-
+    static int get_random_number() //generating random number to choose type of tetramino
+            {
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_int_distribution<> distr(0, 6);
+                return distr(gen);
+            }
 };
-
-const std::vector<Tetramino> Tetramino::tetraminos=
-        {
-                Tetramino(1,3,5,7),//I
-                Tetramino(3,5,7,6),//J
-                Tetramino(2,4,6,7),//L
-                Tetramino(4,5,6,7),//O
-                Tetramino(2,4,5,7),//S
-                Tetramino(2,4,5,6),//T
-                Tetramino(3,5,4,6),//Z
-        };
-
-
 
 
 
 int main() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distr(0, 6);
-    short random_number=distr(gen);
-    Texture tiles;
-    tiles.loadFromFile("../tiles.png");
-    Sprite sprite(tiles);
 
-    short dx=0;
-    float dy=0;
-
-    sprite.setTextureRect(IntRect(0,0,TetrisSpace::texture_width,TetrisSpace::texture_high));
-
-    sprite.setScale(1.0/TetrisSpace::scale,1.0/TetrisSpace::scale);
-
-
+    int random_number= Random::get_random_number();
+    int deley=1;
+    Fild fild{};
+    int counter=1;
     RenderWindow window(VideoMode(TetrisSpace::window_width, TetrisSpace::windows_height),"Tetris game");
     while(window.isOpen())
     {
@@ -72,47 +42,53 @@ int main() {
             {
                 window.close();
             }
-            if(event.type==event.KeyPressed)
+            if(event.type==event.KeyPressed)  //handling different type of pressed key
             {
                 if(event.key.code==sf::Keyboard::Left)
-                    dx--;
+                {
+                    Tetramino::tetraminos[random_number].Shift_Left();
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number]);
+                }
                 if(event.key.code==sf::Keyboard::Right)
-                    dx++;
+                {
+                    Tetramino::tetraminos[random_number].Shift_Right();
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number]);
+                }
+                if(event.key.code==sf::Keyboard::Up)
+                {
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::UP); //rotate and check for collision with x axes
+                }
+                if(event.key.code==sf::Keyboard::Down)
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::DOWN); //rotate and check for collision with x axes
             }
         }
         window.clear(Color::White);
 
+        Texture tiles;
+        tiles.loadFromFile("../tiles.png");
+        Sprite sprite(tiles);
 
-        std::vector<short> x=Tetramino::tetraminos[random_number].Get_X();
+        sprite.setTextureRect(IntRect(0,0,TetrisSpace::texture_width,TetrisSpace::texture_high));
 
-        std::vector<short> y=Tetramino::tetraminos[random_number].Get_Y();
+        sprite.setScale(1.0/TetrisSpace::scale,1.0/TetrisSpace::scale); //make proper size for tetraminos sprite
+
+
+        std::array<short,4> x=Tetramino::tetraminos[random_number].Get_X();
+
+        std::array<short,4> y=Tetramino::tetraminos[random_number].Get_Y();
 
         for(int i=0;i<x.size();i++)
         {
-            sprite.setPosition(static_cast<float>((x[i]+dx)*TetrisSpace::block_width),static_cast<float>((y[i]+dy)*TetrisSpace::block_high));
+            sprite.setPosition(static_cast<float>(x[i]*TetrisSpace::block_width),static_cast<float>((y[i])*TetrisSpace::block_high));
             window.draw(sprite);
         }
 
-        int max=0;
-        for(auto& elem: y)
-        {
-            if(elem>max)
-                max=elem;
-        }
-        if((max+dy)*TetrisSpace::block_high<TetrisSpace::windows_height-TetrisSpace::block_high)
-        {
-            dy+=0.005;
-        }
+        fild.draw(sprite,window);
+
 
         window.display();
 
-
-
     }
-
-
-
-
 
 
 
