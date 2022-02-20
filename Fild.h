@@ -1,14 +1,15 @@
 //
 // Created by Павло Гончарук on 19.02.2022.
 //
-
 #ifndef TETRIS_FILD_H
 #define TETRIS_FILD_H
 #include<iostream>
 #include<array>
 #include "Tetramino.h"
 #include <SFML/Graphics.hpp>
+#include "Tetramino.h"
 
+class Tetramino;
 
 
 class Fild {
@@ -19,6 +20,11 @@ public:
 
     void draw(sf::Sprite& sprite,sf::RenderWindow& window);
 
+    bool get_fild(int x,int y) const;
+
+    void clear_line();
+
+    void shift_down(int cleared_index);
 };
 
 

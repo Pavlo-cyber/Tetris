@@ -4,7 +4,6 @@
 #include "Tetramino.h"
 
 
-
 Tetramino::Tetramino(std::array<short,4> rect): _rect(rect)
         {
         _x={static_cast<short>(_rect[0]%2),static_cast<short>(_rect[1]%2),static_cast<short>(_rect[2]%2),static_cast<short>(_rect[3]%2)};
@@ -72,8 +71,6 @@ void Tetramino::Fall(int &deley) {
     if(static_cast<float>(time)/CLOCKS_PER_SEC>=(TetrisSpace::num_of_second*deley))
     {
         deley++;
-//           std::cout<<static_cast<float>(time)/CLOCKS_PER_SEC<<std::endl;
-//           std::cout<<TetrisSpace::num_of_second*deley<<std::endl;
         for(auto& elem: _y)
             elem++;
     }
@@ -89,4 +86,26 @@ std::array<Tetramino,7> Tetramino::tetraminos=
                 Tetramino(std::array<short,4>{2,4,5,6}),//T  //array[1] rotation center
                 Tetramino(std::array<short,4>{3,4,5,6}),//Z  //array[1] rotation center
         };
+
+
+
+void Tetramino::Shift_UP() {
+    for( auto& elem:_y)
+    {
+        elem--;
+    }
+}
+
+bool Tetramino::Is_Fell(Fild &fild) {
+    for(int i=0;i<_x.size();i++)
+    {
+        if(_y[i]==TetrisSpace::windows_height/TetrisSpace::block_high-1)
+            return true;
+        if(fild.get_fild(_x[i],_y[i]+1))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 

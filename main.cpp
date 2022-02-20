@@ -31,6 +31,7 @@ int main() {
     int random_number= Random::get_random_number();
     int deley=1;
     Fild fild{};
+    int color=Random::get_random_number();
     int counter=1;
     RenderWindow window(VideoMode(TetrisSpace::window_width, TetrisSpace::windows_height),"Tetris game");
     while(window.isOpen())
@@ -47,19 +48,23 @@ int main() {
                 if(event.key.code==sf::Keyboard::Left)
                 {
                     Tetramino::tetraminos[random_number].Shift_Left();
-                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number]);
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],fild,Tetramino::LEFT);
                 }
                 if(event.key.code==sf::Keyboard::Right)
                 {
                     Tetramino::tetraminos[random_number].Shift_Right();
-                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number]);
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],fild,Tetramino::RIGHT);
                 }
                 if(event.key.code==sf::Keyboard::Up)
                 {
-                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::UP); //rotate and check for collision with x axes
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::UP,fild); //rotate and check for collision with x axes
                 }
                 if(event.key.code==sf::Keyboard::Down)
-                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::DOWN); //rotate and check for collision with x axes
+                    Collision_Handler::handle_x(Tetramino::tetraminos[random_number],Tetramino::DOWN,fild); //rotate and check for collision with x axes
+                    if(event.key.code==sf::Keyboard::Space)
+                    {
+                        deley/=1.01;
+                    }
             }
         }
         window.clear(Color::White);
@@ -68,7 +73,7 @@ int main() {
         tiles.loadFromFile("../tiles.png");
         Sprite sprite(tiles);
 
-        sprite.setTextureRect(IntRect(0,0,TetrisSpace::texture_width,TetrisSpace::texture_high));
+        sprite.setTextureRect(IntRect(TetrisSpace::texture_width*color,0,TetrisSpace::texture_width,TetrisSpace::texture_high));
 
         sprite.setScale(1.0/TetrisSpace::scale,1.0/TetrisSpace::scale); //make proper size for tetraminos sprite
 
@@ -84,6 +89,19 @@ int main() {
         }
 
         fild.draw(sprite,window);
+
+        if(Tetramino::tetraminos[random_number].Is_Fell(fild))
+        {
+            fild.fill(Tetramino::tetraminos[random_number]);
+            Tetramino::tetraminos[random_number].Return_Basic();
+            random_number=Random::get_random_number();
+            color=Random::get_random_number();
+        }
+        else
+        {
+            Tetramino::tetraminos[random_number].Fall(deley);
+        }
+        fild.clear_line();
 
 
         window.display();

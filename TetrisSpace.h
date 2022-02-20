@@ -13,7 +13,7 @@ namespace TetrisSpace
     const int block_high=block_width;
     const int window_width=block_width*10;
     const int windows_height=block_high*20;
-    const int num_of_second=1;
+    const double num_of_second=0.5;
 }
 
 
